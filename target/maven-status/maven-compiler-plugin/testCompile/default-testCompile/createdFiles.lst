@@ -1,0 +1,4 @@
+com/raktakk/backend/controller/PublicControllerTest.class
+com/raktakk/backend/controller/AuthSecurityTest.class
+com/raktakk/backend/service/MarketplaceServiceTest.class
+com/raktakk/backend/service/SubscriptionPlanServiceTest.class
