@@ -1,4 +1,5 @@
 /home/bmd/Bureau/deploiement-Raktak/raktakk-spring-backend/src/main/java/com/raktakk/backend/RaktakkBackendApplication.java
+/home/bmd/Bureau/deploiement-Raktak/raktakk-spring-backend/src/main/java/com/raktakk/backend/config/RailwayDatasourceBootstrap.java
 /home/bmd/Bureau/deploiement-Raktak/raktakk-spring-backend/src/main/java/com/raktakk/backend/config/RailwayDatasourceEnvironmentPostProcessor.java
 /home/bmd/Bureau/deploiement-Raktak/raktakk-spring-backend/src/main/java/com/raktakk/backend/controller/AdminController.java
 /home/bmd/Bureau/deploiement-Raktak/raktakk-spring-backend/src/main/java/com/raktakk/backend/controller/AdminSubscriptionPlanController.java
