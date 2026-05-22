@@ -16,7 +16,7 @@ spring:
     url: ${SPRING_DATASOURCE_URL:${DATABASE_URL:}}
     username: ${SPRING_DATASOURCE_USERNAME:${PGUSER:}}
     password: ${SPRING_DATASOURCE_PASSWORD:${PGPASSWORD:}}
-    driver-class-name: org.postgresql.Driver
+    driver-class-name: org.postgresql.Driver  
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -43,3 +43,9 @@ spring:
 server:
   port: ${PORT:8080}
 
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    access-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}
+    refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:1209600000}
+    refresh-secret: ${JWT_REFRESH_SECRET}
