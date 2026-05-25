@@ -61,12 +61,6 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
-  datasource:
-    url: ${SPRING_DATASOURCE_URL:${DB_URL:${DATABASE_URL:jdbc:postgresql://localhost:5432/raktakk}}}
-    username: ${SPRING_DATASOURCE_USERNAME:${DB_USERNAME:${PGUSER:${POSTGRES_USER:postgres}}}}
-    password: ${SPRING_DATASOURCE_PASSWORD:${DB_PASSWORD:${PGPASSWORD:${POSTGRES_PASSWORD:postgres}}}}
-    driver-class-name: org.postgresql.Driver
-
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
