@@ -126,6 +126,8 @@ Copier `.env.example` et renseigner les valeurs (Railway variables).
 1. Créer une DB PostgreSQL Supabase et récupérer URL/credentials.
 2. Créer un projet Railway et connecter ce dossier.
 3. Configurer les variables d'environnement (voir `.env.example`).
+  - Le backend accepte `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD`.
+  - Il sait aussi lire les variables Railway PostgreSQL (`DATABASE_URL`, `DATABASE_PUBLIC_URL`, `PGUSER`, `PGPASSWORD`, `POSTGRES_USER`, `POSTGRES_PASSWORD`).
 4. Déployer et tester `GET /api/public/health`.
 
 ## OAuth2 Google

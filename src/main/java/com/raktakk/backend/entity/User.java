@@ -28,11 +28,11 @@ public class User {
     private String fullName;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 32)
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 32)
     private AuthProvider authProvider;
 
     @OneToOne(mappedBy = "user", fetch = FetchType.LAZY)
