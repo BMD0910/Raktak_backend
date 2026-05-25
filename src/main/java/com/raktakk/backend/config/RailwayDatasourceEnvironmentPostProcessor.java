@@ -28,33 +28,38 @@ public class RailwayDatasourceEnvironmentPostProcessor implements EnvironmentPos
 	public void postProcessEnvironment(ConfigurableEnvironment environment, SpringApplication application) {
 		Map<String, Object> overrides = new LinkedHashMap<>();
 
-		String springUrl = trimToNull(environment.getProperty("SPRING_DATASOURCE_URL"));
-		String databaseUrl = trimToNull(firstNonBlank(
+		String springUrl = normalizeCandidate(environment.getProperty("SPRING_DATASOURCE_URL"));
+		String databaseUrl = normalizeCandidate(firstNonBlank(
 				environment.getProperty("DATABASE_URL"),
 				environment.getProperty("DATABASE_PUBLIC_URL"),
 				environment.getProperty("DB_URL")));
+		String pgUrl = buildJdbcUrlFromParts(
+				normalizeCandidate(environment.getProperty("PGHOST")),
+				normalizeCandidate(environment.getProperty("PGPORT")),
+				normalizeCandidate(firstNonBlank(environment.getProperty("PGDATABASE"), environment.getProperty("POSTGRES_DB"))));
 
-		String resolvedUrl = normalizeJdbcUrl(firstNonBlank(springUrl, databaseUrl));
+		String resolvedUrl = normalizeJdbcUrl(firstNonBlank(springUrl, databaseUrl, pgUrl));
 		if (StringUtils.hasText(resolvedUrl)) {
 			overrides.put("SPRING_DATASOURCE_URL", resolvedUrl);
 			overrides.put("spring.datasource.url", resolvedUrl);
+			overrides.put("spring.datasource.driver-class-name", "org.postgresql.Driver");
 		}
 
 		String username = firstNonBlank(
-				environment.getProperty("SPRING_DATASOURCE_USERNAME"),
-				environment.getProperty("DB_USERNAME"),
-				environment.getProperty("PGUSER"),
-				environment.getProperty("POSTGRES_USER"));
+				normalizeCandidate(environment.getProperty("SPRING_DATASOURCE_USERNAME")),
+				normalizeCandidate(environment.getProperty("DB_USERNAME")),
+				normalizeCandidate(environment.getProperty("PGUSER")),
+				normalizeCandidate(environment.getProperty("POSTGRES_USER")));
 		if (StringUtils.hasText(username)) {
 			overrides.put("SPRING_DATASOURCE_USERNAME", username);
 			overrides.put("spring.datasource.username", username);
 		}
 
 		String password = firstNonBlank(
-				environment.getProperty("SPRING_DATASOURCE_PASSWORD"),
-				environment.getProperty("DB_PASSWORD"),
-				environment.getProperty("PGPASSWORD"),
-				environment.getProperty("POSTGRES_PASSWORD"));
+				normalizeCandidate(environment.getProperty("SPRING_DATASOURCE_PASSWORD")),
+				normalizeCandidate(environment.getProperty("DB_PASSWORD")),
+				normalizeCandidate(environment.getProperty("PGPASSWORD")),
+				normalizeCandidate(environment.getProperty("POSTGRES_PASSWORD")));
 		if (StringUtils.hasText(password)) {
 			overrides.put("SPRING_DATASOURCE_PASSWORD", password);
 			overrides.put("spring.datasource.password", password);
@@ -110,6 +115,20 @@ public class RailwayDatasourceEnvironmentPostProcessor implements EnvironmentPos
 		return candidate;
 	}
 
+	private String buildJdbcUrlFromParts(String host, String port, String database) {
+		if (!StringUtils.hasText(host) || !StringUtils.hasText(database)) {
+			return null;
+		}
+
+		StringBuilder jdbc = new StringBuilder("jdbc:postgresql://").append(host.trim());
+		if (StringUtils.hasText(port)) {
+			jdbc.append(':').append(port.trim());
+		}
+		jdbc.append('/').append(database.trim());
+		jdbc.append("?sslmode=require");
+		return jdbc.toString();
+	}
+
 	private String firstNonBlank(String... values) {
 		for (String value : values) {
 			if (StringUtils.hasText(value)) {
@@ -121,5 +140,16 @@ public class RailwayDatasourceEnvironmentPostProcessor implements EnvironmentPos
 
 	private String trimToNull(String value) {
 		return StringUtils.hasText(value) ? value.trim() : null;
+	}
+
+	private String normalizeCandidate(String value) {
+		String candidate = trimToNull(value);
+		if (!StringUtils.hasText(candidate)) {
+			return null;
+		}
+		if (candidate.contains("${")) {
+			return null;
+		}
+		return candidate;
 	}
 }
