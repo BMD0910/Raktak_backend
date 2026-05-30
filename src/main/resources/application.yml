@@ -38,16 +38,16 @@ unitech:
     base-url: ${UNITECH_API_BASE:https://api.unitech.sn/api.php}
     key: ${UNITECH_API_KEY:}
   callbacks:
-    base-url: ${UNITECH_CALLBACK_BASE:http://localhost:8080}
+    base-url: ${UNITECH_CALLBACK_BASE:}
 
 app:
   name: Raktakk
 
   jwt:
-    secret: ${JWT_SECRET:qqtB9TdEm15Dw97cYc+3c0HwPh1vl8fWIxwEq2Hj+A=}
+    secret: ${JWT_SECRET:}
     access-expiration-ms: ${JWT_ACCESS_EXPIRATION_MS:900000}
     refresh-expiration-ms: ${JWT_REFRESH_EXPIRATION_MS:1209600000}
-    refresh-secret: ${JWT_REFRESH_SECRET:VAGiBKTuvigHocGkl7LfoFHlLaUutrZCWK/UV+wHvZw=}
+    refresh-secret: ${JWT_REFRESH_SECRET:}
 
   refresh-cookie:
     name: ${REFRESH_COOKIE_NAME:raktakk_refresh_token}
@@ -55,10 +55,10 @@ app:
     same-site: ${REFRESH_COOKIE_SAME_SITE:Lax}
 
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:}
 
   oauth2:
-    success-redirect-uri: ${OAUTH2_SUCCESS_REDIRECT_URI:http://localhost:5173/oauth2/success}
+    success-redirect-uri: ${OAUTH2_SUCCESS_REDIRECT_URI:}
 
   security:
     require-https: ${REQUIRE_HTTPS:false}

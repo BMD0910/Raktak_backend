@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
 
@@ -93,12 +94,25 @@ public class JwtService {
     }
 
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(java.util.Base64.getEncoder().encodeToString(secret.getBytes()));
-        return Keys.hmacShaKeyFor(keyBytes);
+        return toSigningKey(secret, "JWT_SECRET");
     }
 
     private SecretKey getRefreshSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(java.util.Base64.getEncoder().encodeToString(refreshSecret.getBytes()));
+        return toSigningKey(refreshSecret, "JWT_REFRESH_SECRET");
+    }
+
+    private SecretKey toSigningKey(String value, String propertyName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalStateException(propertyName + " is not configured");
+        }
+
+        byte[] keyBytes;
+        try {
+            keyBytes = Decoders.BASE64.decode(value);
+        } catch (IllegalArgumentException ex) {
+            keyBytes = value.getBytes(StandardCharsets.UTF_8);
+        }
+
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

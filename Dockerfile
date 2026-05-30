@@ -20,12 +20,8 @@ COPY --from=builder /app/target/backend-0.0.1-SNAPSHOT.jar app.jar
 # Set production profile by default
 ENV SPRING_PROFILES_ACTIVE=prod
 
-# Expose port (Railway will replace $PORT in start command)
+# Expose the default container port; Render overrides it through PORT.
 EXPOSE 8080
 
-# Health check (requires curl in runtime; fallback to simple java process check if absent)
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD ["/bin/sh","-c","(command -v curl >/dev/null 2>&1 && curl -f http://localhost:${PORT:-8080}/actuator/health) || (netstat -tnlp 2>/dev/null | grep -q java) || exit 1"]
-
 # Start application
-ENTRYPOINT ["sh", "-c", "java -Dserver.port=${PORT:-8080} -jar /app/app.jar"]
+ENTRYPOINT ["sh", "-c", "exec java -jar /app/app.jar"]

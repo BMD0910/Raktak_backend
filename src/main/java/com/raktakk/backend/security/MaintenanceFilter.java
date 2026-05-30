@@ -30,6 +30,7 @@ public class MaintenanceFilter extends OncePerRequestFilter {
 
         // Allow health and actuator endpoints, public API and OPTIONS
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())
+            || path.equals("/health")
                 || path.startsWith("/api/public/")
                 || path.startsWith("/api/public/health")
                 || path.startsWith("/actuator")) {
