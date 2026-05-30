@@ -85,6 +85,7 @@ com/raktakk/backend/dto/SubscriptionPlanResponse.class
 com/raktakk/backend/controller/AdminController$1.class
 com/raktakk/backend/dto/SubcategoryResponse.class
 com/raktakk/backend/controller/DashboardController.class
+com/raktakk/backend/config/RailwayDataSourceConfig.class
 com/raktakk/backend/entity/Message.class
 com/raktakk/backend/entity/Category$CategoryBuilder.class
 com/raktakk/backend/service/AuthService.class
