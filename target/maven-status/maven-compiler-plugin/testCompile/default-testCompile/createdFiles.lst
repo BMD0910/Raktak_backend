@@ -1,3 +1,4 @@
+com/raktakk/backend/controller/HealthControllerTest.class
 com/raktakk/backend/controller/PublicControllerTest.class
 com/raktakk/backend/controller/AuthSecurityTest.class
 com/raktakk/backend/service/MarketplaceServiceTest.class
