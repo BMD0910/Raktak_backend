@@ -8,26 +8,42 @@ import javax.sql.DataSource;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 @Configuration
+@Profile("prod")
 public class RailwayDataSourceConfig {
 
+    private static final Logger log = LoggerFactory.getLogger(RailwayDataSourceConfig.class);
+
     @Bean
-    public DataSource dataSource() {
-        String jdbcUrl = resolveJdbcUrl();
+    public DataSource dataSource(Environment environment) {
+        String jdbcUrl = resolveJdbcUrl(environment);
         String username = firstNonBlank(
-                cleanEnv("SPRING_DATASOURCE_USERNAME"),
-                cleanEnv("DB_USERNAME"),
-                cleanEnv("PGUSER"),
-                cleanEnv("POSTGRES_USER"));
+                normalizeCandidate(get(environment, "SPRING_DATASOURCE_USERNAME")),
+                normalizeCandidate(get(environment, "DB_USERNAME")),
+                normalizeCandidate(get(environment, "PGUSER")),
+                normalizeCandidate(get(environment, "POSTGRES_USER")));
         String password = firstNonBlank(
-                cleanEnv("SPRING_DATASOURCE_PASSWORD"),
-                cleanEnv("DB_PASSWORD"),
-                cleanEnv("PGPASSWORD"),
-                cleanEnv("POSTGRES_PASSWORD"));
+                normalizeCandidate(get(environment, "SPRING_DATASOURCE_PASSWORD")),
+                normalizeCandidate(get(environment, "DB_PASSWORD")),
+                normalizeCandidate(get(environment, "PGPASSWORD")),
+                normalizeCandidate(get(environment, "POSTGRES_PASSWORD")));
+
+        log.info("Railway datasource: mode=prod, urlSource={}, host={}, port={}, database={}, username={}, password={}",
+                describe(get(environment, "SPRING_DATASOURCE_URL")),
+                describe(get(environment, "PGHOST")),
+                describe(get(environment, "PGPORT")),
+                describe(firstNonBlank(get(environment, "PGDATABASE"), get(environment, "POSTGRES_DB"))),
+                describe(username),
+                describe(password));
+        log.info("Railway datasource: finalJdbcUrl={}", maskJdbcUrl(jdbcUrl));
 
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(jdbcUrl);
@@ -43,21 +59,27 @@ public class RailwayDataSourceConfig {
         return new HikariDataSource(config);
     }
 
-    private String resolveJdbcUrl() {
-        String direct = cleanEnv("SPRING_DATASOURCE_URL");
+    private String resolveJdbcUrl(Environment environment) {
+        String direct = normalizeCandidate(get(environment, "SPRING_DATASOURCE_URL"));
         if (isUsable(direct)) {
+            log.info("Railway datasource: mode=SPRING_DATASOURCE_URL");
             return toJdbcUrl(direct);
         }
 
-        String databaseUrl = firstNonBlank(cleanEnv("DATABASE_URL"), cleanEnv("DATABASE_PUBLIC_URL"), cleanEnv("DB_URL"));
+        String databaseUrl = firstNonBlank(
+                normalizeCandidate(get(environment, "DATABASE_URL")),
+                normalizeCandidate(get(environment, "DATABASE_PUBLIC_URL")),
+                normalizeCandidate(get(environment, "DB_URL")));
         if (isUsable(databaseUrl)) {
+            log.info("Railway datasource: mode=DATABASE_URL");
             return toJdbcUrl(databaseUrl);
         }
 
-        String host = cleanEnv("PGHOST");
-        String port = cleanEnv("PGPORT");
-        String database = firstNonBlank(cleanEnv("PGDATABASE"), cleanEnv("POSTGRES_DB"));
+        String host = normalizeCandidate(get(environment, "PGHOST"));
+        String port = normalizeCandidate(get(environment, "PGPORT"));
+        String database = firstNonBlank(normalizeCandidate(get(environment, "PGDATABASE")), normalizeCandidate(get(environment, "POSTGRES_DB")));
         if (isUsable(host) && isUsable(database)) {
+            log.info("Railway datasource: mode=PGHOST_PGPORT_PGDATABASE");
             StringBuilder jdbc = new StringBuilder("jdbc:postgresql://").append(host.trim());
             if (isUsable(port)) {
                 jdbc.append(':').append(port.trim());
@@ -68,7 +90,7 @@ public class RailwayDataSourceConfig {
         }
 
         throw new IllegalStateException(
-                "Aucune configuration datasource valide trouvée. Définissez SPRING_DATASOURCE_URL ou PGHOST/PGPORT/PGDATABASE dans Railway.");
+            "Aucune configuration datasource valide trouvée. Définissez SPRING_DATASOURCE_URL ou PGHOST/PGPORT/PGDATABASE dans Railway.");
     }
 
     private String toJdbcUrl(String value) {
@@ -77,7 +99,11 @@ public class RailwayDataSourceConfig {
             return candidate;
         }
 
-        if (candidate.startsWith("postgres://") || candidate.startsWith("postgresql://")) {
+        if (candidate.startsWith("postgres://")) {
+            return "jdbc:postgresql://" + candidate.substring("postgres://".length());
+        }
+
+        if (candidate.startsWith("postgresql://")) {
             return "jdbc:" + candidate;
         }
 
@@ -107,16 +133,12 @@ public class RailwayDataSourceConfig {
         return candidate;
     }
 
-    private String cleanEnv(String key) {
-        String value = System.getenv(key);
+    private String get(Environment environment, String key) {
+        String value = environment.getProperty(key);
         if (value == null) {
-            return null;
+            value = System.getenv(key);
         }
-        String trimmed = value.trim();
-        if (trimmed.isEmpty() || trimmed.contains("${")) {
-            return null;
-        }
-        return trimmed;
+        return value;
     }
 
     private boolean isUsable(String value) {
@@ -130,5 +152,51 @@ public class RailwayDataSourceConfig {
             }
         }
         return null;
+    }
+
+    private String normalizeCandidate(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        if (trimmed.isEmpty() || trimmed.contains("${")) {
+            return null;
+        }
+        return trimmed;
+    }
+
+    private String describe(String value) {
+        if (value == null) {
+            return "absent";
+        }
+        String trimmed = value.trim();
+        if (trimmed.isEmpty()) {
+            return "blank";
+        }
+        if (trimmed.contains("${")) {
+            return "placeholder";
+        }
+        return "present";
+    }
+
+    private String maskJdbcUrl(String jdbcUrl) {
+        if (jdbcUrl == null) {
+            return "null";
+        }
+        String masked = jdbcUrl;
+        int passwordIndex = masked.toLowerCase(Locale.ROOT).indexOf("password=");
+        if (passwordIndex >= 0) {
+            int end = masked.indexOf('&', passwordIndex);
+            if (end < 0) {
+                end = masked.length();
+            }
+            masked = masked.substring(0, passwordIndex + "password=".length()) + "***" + masked.substring(end);
+        }
+        int userInfoIndex = masked.indexOf("//");
+        int atIndex = masked.indexOf('@', userInfoIndex + 2);
+        if (userInfoIndex >= 0 && atIndex > userInfoIndex) {
+            masked = masked.substring(0, userInfoIndex + 2) + "***:***@" + masked.substring(atIndex + 1);
+        }
+        return masked;
     }
 }
