@@ -355,6 +355,11 @@ public class DataInitializer implements CommandLineRunner {
                         .priceFcfa(0L)
                         .description("Pour découvrir la plateforme avant abonnement vendeur")
                         .featuresText("Profil basique\n10 leads/mois")
+                .maxServices(10)
+                .maxFeaturedServices(0)
+                .allowFeatured(false)
+                .allowPremiumBadge(false)
+                .requireCompleteProfile(false)
                         .active(true)
                         .displayOrder(1)
                         .build(),
@@ -364,6 +369,11 @@ public class DataInitializer implements CommandLineRunner {
                         .priceFcfa(29900L)
                         .description("Pour devenir prestataire avec visibilité renforcée")
                         .featuresText("Profil complet\n50 leads/mois")
+                .maxServices(50)
+                .maxFeaturedServices(1)
+                .allowFeatured(true)
+                .allowPremiumBadge(true)
+                .requireCompleteProfile(true)
                         .active(true)
                         .displayOrder(2)
                         .build(),
@@ -373,6 +383,11 @@ public class DataInitializer implements CommandLineRunner {
                         .priceFcfa(79900L)
                         .description("Pour les structures qui veulent un volume maximal")
                         .featuresText("Leads illimités\nMise en avant")
+                .maxServices(9999)
+                .maxFeaturedServices(5)
+                .allowFeatured(true)
+                .allowPremiumBadge(true)
+                .requireCompleteProfile(true)
                         .active(true)
                         .displayOrder(3)
                         .build()
@@ -384,6 +399,11 @@ public class DataInitializer implements CommandLineRunner {
                 existing.setPriceFcfa(seed.getPriceFcfa());
                 existing.setDescription(seed.getDescription());
                 existing.setFeaturesText(seed.getFeaturesText());
+                existing.setMaxServices(seed.getMaxServices());
+                existing.setMaxFeaturedServices(seed.getMaxFeaturedServices());
+                existing.setAllowFeatured(seed.isAllowFeatured());
+                existing.setAllowPremiumBadge(seed.isAllowPremiumBadge());
+                existing.setRequireCompleteProfile(seed.isRequireCompleteProfile());
                 existing.setActive(seed.isActive());
                 existing.setDisplayOrder(seed.getDisplayOrder());
                 subscriptionPlanRepository.save(existing);

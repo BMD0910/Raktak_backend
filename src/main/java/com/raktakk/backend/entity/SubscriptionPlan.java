@@ -66,11 +66,15 @@ public class SubscriptionPlan {
         this.createdAt = now;
         this.updatedAt = now;
         if (displayOrder == null) displayOrder = 0;
+        if (maxServices == null) maxServices = 0;
+        if (maxFeaturedServices == null) maxFeaturedServices = 0;
     }
 
     @PreUpdate
     public void onUpdate() {
         this.updatedAt = Instant.now();
         if (displayOrder == null) displayOrder = 0;
+        if (maxServices == null) maxServices = 0;
+        if (maxFeaturedServices == null) maxFeaturedServices = 0;
     }
 }
