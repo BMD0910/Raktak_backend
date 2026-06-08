@@ -65,6 +65,7 @@ com/raktakk/backend/entity/AuditLog.class
 com/raktakk/backend/dto/SubscriptionPlanUpdateRequest.class
 com/raktakk/backend/service/RefreshTokenService.class
 com/raktakk/backend/repository/SubscriptionPlanRepository.class
+com/raktakk/backend/controller/AdminCatalogController.class
 com/raktakk/backend/controller/AdminController.class
 com/raktakk/backend/dto/ServiceResponse.class
 com/raktakk/backend/controller/ContactController$ApiResponse.class
